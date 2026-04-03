@@ -1,1 +1,0 @@
-hasPairWithDifference (A)

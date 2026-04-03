@@ -7,7 +7,7 @@
 -- יצירה של טבלה חדשה ויקטואלית היא לא באמת נשמרת או מחליפה את הטבלה שלי 
 ALTER VIEW v_clean_data AS 
 -- שליפה של עמודות מסויימות מהטבלה
-SELECT customerID, MonthlyCharges,tenure,Contract,
+SELECT customerID, MonthlyCharges, tenure, Contract, InternetService, 
 -- בדיקה אם הערך הוא כן
 CASE WHEN Churn = 'Yes'
 -- נהפוך אותו ל-1
