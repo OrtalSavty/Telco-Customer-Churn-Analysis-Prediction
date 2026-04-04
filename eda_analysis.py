@@ -1,10 +1,8 @@
 # הצגת הנתונים בצורה גרפית
-from itertools import groupby
-
 import pandas as pd
 import sqlalchemy
-import urllib
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # משתנים
 # שם השרת
@@ -28,9 +26,14 @@ engine = sqlalchemy.create_engine(connection_url)
 df = pd.read_sql ("SELECT * FROM v_clean_data" ,engine)
 
 # בדיקה שעבר וקרא את כל הדאטה מה-SQL
-# מדפיס את ה-5 שורות הראשונות של הטבלה
+# מדפיס את ה-3 שורות הראשונות של הטבלה
 # לא נדפיס את הכל כדי לא להציף את המחשב
-print(df.head())
+print(df.head(3))
+
+# --------------גרף 1 --------------
+# kind - סוג גרף במקרה זה גרף עוגה
+# חישוב האחוזים של כל פרוסה וכתיבה שלהם  בתוך העוגה - autopct
+# labels - השמות של כל פרוסת עוגה
 
 # כמה לקוחות עזבו וכמה נשארו
 # פונקציה קיימת בפנדס שעושה את ספירת הערכים
@@ -42,6 +45,7 @@ counts = df['churn_label'].value_counts()
 # תציד את האחוז של כל פרוסה כמספר עשרוני עם מספר 1 אחרי הנקודה
 # כותרות לגרף
 counts.plot(kind='pie', autopct='%1.1f%%', labels=['Stayed', 'Left'])
+
 # הגדרת כורתרת ראשית לתרשים
 plt.title('Churn Label Distribution')
 #הגדרה של כותרת ציר Y כ-ריקה
@@ -49,21 +53,22 @@ plt.ylabel("")
 # הצגת התנתונים
 plt.show()
 
-
-
+# --------------גרף 2 --------------
 # דף חדש שבוא אין ציור של הגרף הקודם
 plt.figure()
-# גרף היסטוגרמה
-# בודק את העמודה של עזיבה
-# רמת שקיפות הגרפים כדי שנראה אותם כשהם אחד על השני
-# כותרת \ תווית מה כל צבע אומר
-# צבע הגרף
+# גרף היסטוגרמה משתי גרפים
+# alpha - שקיפות הגרף
+# label - מקרא
+# bins - מגדיל את מספר העמודות בגרף
 
-# גרף 1
+# היסטוגרמה 1
 # בודק אם שווה ל-0 כלומר לא עזב
-# הולך לאלא שלא עזבו ובודק בעמודה של התשלומים מה ההחזר תשלומים שלהם
+# ואז הולך לאלא שלא עזבו ובודק בעמודה של התשלומים מה ההחזר תשלומים שלהם
 plt.hist(df[df['churn_label'] ==0]['MonthlyCharges'], alpha=0.5, label='Stayed', bins=30, color='green')
-# גרף 2
+
+# היסטוגרמה 2
+# בודק אם שווה ל-0 כלומר לא עזב
+# ואז הולך לאלא שלא עזבו ובודק בעמודה של התשלומים מה ההחזר תשלומים שלהם
 plt.hist(df[df['churn_label'] ==1]['MonthlyCharges'], alpha=0.5, label='Left', bins=30, color='red')
 
 # הוספת כותרת ראשית
@@ -74,36 +79,41 @@ plt.xlabel('Monthly Charges ($)')
 plt.ylabel('Number of Customers')
 # תוספת מקרא מי אדום ומי ירוק
 plt.legend()
-
 # הצגת הגרף
 plt.show()
 
+# --------------גרף 3 --------------
 # דף חדש שבוא אין ציור של הגרפים הקודמים
 plt.figure()
 
-# גרף 4
 # האם אנשים בלי התחייבות עוזבים יותר
 # האם לקוחות חדשים נמצאים בסיכון יותר גבוהה
+# kind - סוג הגרף במקרה זה גרף עמודות
+# figsize - גודל התמונה (רוחב, גובה)
 
-contract_churn = df.groupby('Contract')['churn_label'].mean()
-contract_churn.plot (kind = 'bar' )
+# חישוב אחוז נטישה
+contract_churn = df.groupby('Contract')['churn_label'].mean() * 100
+# הגת הנתונים
+contract_churn.plot(kind='bar', color='skyblue', figsize=(8,5))
+
+# כותרת ראשית לגרף
 plt.title('Contract Churn Distribution')
-
 # כותרת ציר X
 plt.xlabel('contract type')
 # כותרת ציר Y
-plt.ylabel('Number of Customers')
-
-# תסדרי מספיק רווח לפי הכותרות שלא יחתכו
+plt.ylabel('Percent of Customers')
+#  רווח לפי הכותרות שלא יחתכו
 plt.tight_layout()
 # הצגת הגרף
 plt.show()
 
+
+# --------------גרף 4 --------------
 # דף חדש שבוא אין ציור של הגרפים הקודמים
 plt.figure()
-# גרף 5
-# היסטוגרמה שמראה וותק לעומת עזיבה
+# edgecolor - צבע מסגרת של הגרף
 
+# היסטוגרמה שמראה וותק לעומת עזיבה
 plt.hist(df[df['churn_label'] == 1]['tenure'], bins=30, color='orange', edgecolor='black')
 
 #הוספת כותרת ראשית
@@ -117,3 +127,31 @@ plt.tight_layout()
 
 # הצגת הגרף
 plt.show()
+
+
+# --------------גרף 5 --------------
+# דף חדש שבוא אין ציור של הגרפים הקודמים
+plt.figure(figsize=(10, 5))
+
+# גרך הערכת צפיפות חלקה - מראה איפה מרוכזים רוב הלקוחות
+# figsize - קובע את גודל הדף שאנחנו פותחים לתמונה (רוחב, גובה)
+# hue - במקום הר אחד תצייר שתי הרים של אלו שעזבו ושל אלו שנשארו
+# fill - צובע את השטח מתחת לקו
+# common_norm - נירמול של כל קבוצה בנפרד (התעלמות מזה שיש קצת עוזבים לעומת נשארים כדי שנוכל להראות זאת בצורה יפה ונוחה בגרף)
+# palette - קביעת צבע לכל גרף
+
+# KDE יוצר גרף התפלגות כמו הרים לפי קבוצות
+# ציר ה-X ייצג את וותק הלקוחות
+sns.kdeplot(data=df, x='tenure', hue='churn_label', fill=True, common_norm=False, palette=['green', 'red'])
+
+#  כותרת  ראשית לגרף
+plt.title('Customer Tenure Distribution by Churn')
+#  כותרת לציר X
+plt.xlabel('Tenure (Months)')
+#  כותרת לציר Y
+plt.ylabel('Density')
+# מקרא
+plt.legend(["left", "Stayed"])
+#  הצגת הגרף
+plt.show()
+
