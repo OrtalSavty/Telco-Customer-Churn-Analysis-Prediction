@@ -151,7 +151,32 @@ plt.xlabel('Tenure (Months)')
 #  כותרת לציר Y
 plt.ylabel('Density')
 # מקרא
-plt.legend(["left", "Stayed"])
+plt.legend(["Stayed", "Left"])
 #  הצגת הגרף
 plt.show()
+
+
+
+# --------------גרף 7 --------------
+
+# פתיחת דף חדש לגרףוקביעת גודל הגרף
+plt.figure(figsize=(10, 6))
+# יצירת גרף עמודות. ציר X הוא סוג האינטרנט, ציר Y הוא אחוז הנטישה
+ax = sns.barplot(x='InternetService', y='churn_label', data=df, errorbar=None, color='steelblue')
+# כותרת ראשית
+plt.title('Percentage of Churn by Internet Service Type')
+# כותרת ציר Y
+plt.ylabel('Churn Rate (%)')
+# כותרת ציר X, הובפנו רווח הין הגרף לכותרת
+plt.xlabel('Internet Service', labelpad=15)
+#  הוספת האחוזים מעל כל עמודה
+# לוקחים את הערך של כל עמודה, כופלים ב-100, ומוסיפים סימן של אחוז
+labels = [f'{val*100:.1f}%' for val in ax.containers[0].datavalues]
+ax.bar_label(ax.containers[0], labels=labels, padding=3)
+# הוספת קווי רשת אופקיים
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+# הצגת הגרף
+plt.show()
+
+
 

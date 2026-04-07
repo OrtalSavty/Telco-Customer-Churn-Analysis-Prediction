@@ -245,3 +245,5 @@ plt.ylabel('True Positive Rate')
 plt.legend(loc='lower right')
 # הצגת הגרף
 plt.show()
+
+
