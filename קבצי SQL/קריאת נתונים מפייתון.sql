@@ -1,29 +1,32 @@
---  Total_Charges כתיבת הקוד הבא עקב טיפוס לא נכון בטבלה של
--- פייתון ראתה שדות ריקים וקבע שהם שדות טקסט 
---  אנחנו חייבים לסדר זאת ולהפוך ערכים בולאנים אלו למספריים
--- רק כך נוכל לבצע עליהם חישובים
--- view הוא אינו טבלה אמיתית אלא שומרת את ההיגיון שאני כותבת תחת שם מסויים
+/* הסבר כללי: 
+בגלל שבפייתון חלק מהשדות (כמו Total_Charges) נקלטו כטקסט ולא כמספרים, 
+אנחנו יוצרים View כדי לסדר את הנתונים, להמיר אותם לפורמט מספרי 
+ולהפוך ערכים טקסטואליים (Yes/No) למספרים (1/0) לצורך חישובים עתידיים.
+*/
 
--- יצירה של טבלה חדשה ויקטואלית היא לא באמת נשמרת או מחליפה את הטבלה שלי 
-ALTER VIEW v_clean_data AS 
--- שליפה של עמודות מסויימות מהטבלה
-SELECT customerID, MonthlyCharges, tenure, Contract, InternetService, 
--- בדיקה אם הערך הוא כן
-CASE WHEN Churn = 'Yes'
--- נהפוך אותו ל-1
-	THEN 1
-	-- אחרת נהפוך אותו ל-0
-	ELSE 0
-	-- סוגר את התנאי 
-	-- עכשיו אנחנו נותנים שם חדש לעמודה שפתחנו
-	-- 	היא מכילה את הערכים המספריים במקום הבוליאנים
-	END churn_label,
+-- בדיקה אם ה-View כבר קיים, אם כן - נמחוק אותו כדי ליצור מחדש
+IF OBJECT_ID('v_clean_data', 'V') IS NOT NULL
+    DROP VIEW v_clean_data;
+GO
 
-	-- ותהפוך אותה לערך מספרי עשרוני TotalCharges קח את העמודה
-	--  TRY_CAST_CLAEN לתוצאה החדשה תקרא
-	TRY_CAST (TotalCharges AS FLOAT) AS total_charges_clean 
+CREATE VIEW v_clean_data AS
+-- שליפת העמודות הרלוונטיות מהטבלה הגולמית
+SELECT 
+    customerID, 
+    MonthlyCharges, 
+    tenure, 
+    Contract, 
+    InternetService, 
 
+    -- המרת עמודת Churn מערך טקסטואלי לערך מספרי (1 ל-Yes, 0 אחרת)
+    CASE 
+        WHEN Churn = 'Yes' THEN 1
+        ELSE 0
+    END AS churn_label,
 
+    -- המרת עמודת TotalCharges מפורמט טקסט לפורמט מספרי (Float)
+    -- השימוש ב-TRY_CAST מונע שגיאות אם יש ערכים שלא ניתנים להמרה
+    TRY_CAST(TotalCharges AS FLOAT) AS total_charges_clean 
 
--- שהמחשב ידע עם איזה דאטה בייס לעבוד
 FROM dbo.raw_data_staging;
+GO

@@ -6,7 +6,7 @@ import seaborn as sns
 
 # משתנים
 # שם השרת
-server = 'localhost'
+server = r'.\SQLEXPRESS'
 # שם הדאטה בייס
 database = 'ChurnDB'
 # שם הדרייבר

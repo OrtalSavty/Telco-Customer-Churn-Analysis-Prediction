@@ -12,9 +12,10 @@ from sklearn.metrics import roc_curve, auc
 # יבוא של פונקציית טהירות, מטריצת בלבול
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, recall_score
 # יבוא של פונקציית נרמול
-from sklearn.preprocessing import minmax_scale
+from sklearn.preprocessing import MinMaxScaler
 # חלןקת הנתונים לקבוצת אימון וקבוצת מבחן, עירבוב הנתונים
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split
+from sklearn.pipeline import Pipeline
 
 # יבוא של מודל רגרסיה לוגיסטית
 from sklearn.linear_model import LogisticRegression
@@ -23,7 +24,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 # משתנים
 # שם השרת
-server = 'localhost'
+server = r'.\SQLEXPRESS'
 # שם הדאטה בייס
 database = 'ChurnDB'
 # שם הדרייבר
@@ -54,8 +55,49 @@ X = pd.get_dummies(X_temp, columns=['Contract', 'InternetService', ], drop_first
 # הגדרה של מה יהיה פיצ'ר המטרה שלנו
 Y = df['churn_label']
 
+# ------------ השוואת מודלים עם קרוס ולידציה  ------------
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+scoring = {
+    'accuracy': 'accuracy',
+    'recall': 'recall',
+    'roc_auc': 'roc_auc'
+}
+
+cv_models = {
+    'Logistic Regression': Pipeline([
+        ('scaler', MinMaxScaler()),
+        ('model', LogisticRegression(class_weight='balanced', max_iter=1000))
+    ]),
+    'Random Forest': RandomForestClassifier(class_weight='balanced', random_state=42)
+}
+
+cv_summary_rows = []
+
+for model_name, model in cv_models.items():
+    cv_scores = cross_validate(model, X, Y, cv=cv, scoring=scoring, n_jobs=-1)
+    cv_summary_rows.append({
+        'Model': model_name,
+        'CV Accuracy Mean': cv_scores['test_accuracy'].mean(),
+        'CV Accuracy Std': cv_scores['test_accuracy'].std(),
+        'CV Recall Mean': cv_scores['test_recall'].mean(),
+        'CV Recall Std': cv_scores['test_recall'].std(),
+        'CV ROC-AUC Mean': cv_scores['test_roc_auc'].mean(),
+        'CV ROC-AUC Std': cv_scores['test_roc_auc'].std()
+    })
+
+cv_results = pd.DataFrame(cv_summary_rows).sort_values(
+    by=['CV ROC-AUC Mean', 'CV Recall Mean', 'CV Accuracy Mean'],
+    ascending=False
+)
+
+print("\n---------- Cross-Validation Summary (5 folds) ----------\n")
+print(cv_results.round(3).to_string(index=False))
+
+best_model_name = cv_results.iloc[0]['Model']
+print(f"\nBest model by CV ROC-AUC: {best_model_name}\n")
+
 # נרמול הנתונים
-x_norm = minmax_scale(X)
+x_norm = MinMaxScaler().fit_transform(X)
 
 # הדפסת גודל  X
 print("X shape:", X.shape)
