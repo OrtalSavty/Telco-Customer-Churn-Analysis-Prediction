@@ -24,7 +24,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 # משתנים
 # שם השרת
-server = 'localhost'
+server = r'.\SQLEXPRESS'
 # שם הדאטה בייס
 database = 'ChurnDB'
 # שם הדרייבר
@@ -55,7 +55,7 @@ X = pd.get_dummies(X_temp, columns=['Contract', 'InternetService', ], drop_first
 # הגדרה של מה יהיה פיצ'ר המטרה שלנו
 Y = df['churn_label']
 
-# ------------ השוואת מודלים עם Cross-Validation ------------
+# ------------ השוואת מודלים עם קרוס ולידציה  ------------
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scoring = {
     'accuracy': 'accuracy',

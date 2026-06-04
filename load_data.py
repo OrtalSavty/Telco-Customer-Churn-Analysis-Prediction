@@ -4,7 +4,7 @@ import sqlalchemy
 import urllib
 
 # יצירת נתיב לקובץ CSV
-file_path = r"C:\git repos\Telco-Customer-Churn-Analysis-Prediction\Customer_Data.csv"
+file_path = "Customer_Data.csv"
 
 # קריאה של הקובץ
 # טיפוס טבלה dataFrame
@@ -19,7 +19,7 @@ print(df.head())
 
 # משתנים
 # שם השרת
-server = 'localhost'
+server = r'.\SQLEXPRESS'
 # שם הדאטה בייס
 database = 'ChurnDB'
 # שם הדרייבר
